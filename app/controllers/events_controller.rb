@@ -1,4 +1,8 @@
 class EventsController < ApplicationController
+  include ActionController::HttpAuthentication::Token
+
+  before_action :authenticate_user
+
   def index
     event = Event.all
 
@@ -30,6 +34,14 @@ class EventsController < ApplicationController
   end
 
   private
+
+  def authenticate_user
+    token, _options = token_and_options(request)
+    user_id = AuthenticationTokenService.decode(token)
+    user = User.find(user_id)
+    rescue ActiveRecord::RecordNotFound
+      render status: :unauthorized
+  end
 
   def event_params
     params.require(:event)

@@ -4,9 +4,10 @@ RSpec.describe 'Events API' do
   let(:user) { create(:user) }
   let(:event) { create(:event, user_id: user.id) }
   let!(:events) { create_list(:event, 10, user_id: user.id)}
+  let(:token) { AuthenticationTokenService.call(user.id) }
 
   describe 'GET /events' do
-    before { get '/events' }
+    before { get '/events', headers: {"Authorization" => "Bearer #{token}" } }
 
     it 'returns events' do
       expect(JSON.parse(response.body)).not_to be_empty
@@ -32,7 +33,7 @@ RSpec.describe 'Events API' do
       }
     end
 
-    before { post '/events', params: params }
+    before { post '/events', params: params, headers: {"Authorization" => "Bearer #{token}" } }
     it 'creates a new book' do
       expect(response).to have_http_status(201)
     end
@@ -42,14 +43,14 @@ RSpec.describe 'Events API' do
     let(:params) do {
       event: { address: 'xyz' }
     } end
-    before { put "/events/#{event.id}", params: params }
+    before { put "/events/#{event.id}", params: params, headers: {"Authorization" => "Bearer #{token}" } }
     it 'updates an event' do
       expect(response).to have_http_status(200)
     end
   end
 
   describe 'DELETE /events/:id' do
-    before { delete "/events/#{event.id}" }
+    before { delete "/events/#{event.id}", headers: {"Authorization" => "Bearer #{token}" } }
     it 'deletes an event' do
       expect(response).to have_http_status(:no_content)
     end
